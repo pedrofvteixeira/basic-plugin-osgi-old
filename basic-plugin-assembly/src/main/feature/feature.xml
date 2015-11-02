@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" name="basic-plugin">
+    <feature name="basic-plugin" version="6.1-SNAPSHOT" description="Pentaho Basic Plugin">
+        <details>Pentaho Basic Plugin</details>
+        <configfile finalname="/etc/basic.plugin.cfg">mvn:pentaho/basic-plugin-core/6.1-SNAPSHOT/cfg/basic-plugin-config</configfile>
+        <bundle>mvn:pentaho/basic-plugin-core/6.1-SNAPSHOT</bundle>
+    </feature>
+</features>

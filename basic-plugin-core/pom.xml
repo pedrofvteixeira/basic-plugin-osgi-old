@@ -1,0 +1,136 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>pentaho</groupId>
+    <artifactId>basic-plugin-parent-pom</artifactId>
+    <version>6.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>basic-plugin-core</artifactId>
+  <packaging>bundle</packaging>
+
+  <name>Basic Plugin OSGi bundle</name>
+  <description>Basic Plugin OSGi bundle</description>
+  <url>http://www.pentaho.com/</url>
+
+  <properties>
+  </properties>
+
+  <dependencies>
+
+    <!-- platform (provided) dependencies -->
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-api</artifactId>
+      <version>${dependency.pentaho.platform.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-core</artifactId>
+      <version>${dependency.pentaho.platform.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-repository</artifactId>
+      <version>${dependency.pentaho.platform.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-proxy-factory</artifactId>
+      <version>${dependency.pentaho.platform.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>${dependency.javax.servlet.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${dependency.slf4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- test dependencies -->
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${dependency.junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>${dependency.mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${dependency.slf4j-log4j12.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <!-- This plugin takes care of packaging the artifact as an OSGi Bundle -->
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>
+              ${project.artifactId}
+            </Bundle-SymbolicName>
+          </instructions>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${plugin.org.codehaus.mojo.build-helper-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>src/main/resources/cfg/basic.plugin.cfg</file>
+                  <type>cfg</type>
+                  <classifier>basic-plugin-config</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
