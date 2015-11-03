@@ -31,7 +31,9 @@
 
     <!-- external dependencies -->
 
+    <dependency.commons.logging.version>1.1.1</dependency.commons.logging.version>
     <dependency.javax.servlet.version>3.0.1</dependency.javax.servlet.version>
+    <dependency.javax.rs.ws.version>2.0</dependency.javax.rs.ws.version>
     <dependency.junit.version>4.11</dependency.junit.version>
     <dependency.mockito.version>1.9.5</dependency.mockito.version>
     <dependency.slf4j.version>1.7.3</dependency.slf4j.version>

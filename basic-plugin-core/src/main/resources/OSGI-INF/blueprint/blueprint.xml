@@ -10,16 +10,108 @@
            default-timeout="20000"
            default-activation="lazy">
 
-  <!-- ================================================================================================== -->
-  <!-- CONFIG SETTINGS                                                                                    -->
-  <!-- ================================================================================================== -->
+    <!-- ================================================================================================== -->
+    <!-- CONFIG SETTINGS                                                                                    -->
+    <!-- ================================================================================================== -->
 
-  <cm:property-placeholder persistent-id="basic.plugin" update-strategy="reload">
-    <cm:default-properties>
+    <cm:property-placeholder persistent-id="basic.plugin" update-strategy="reload">
+        <cm:default-properties>
 
-    </cm:default-properties>
-  </cm:property-placeholder>
+            <cm:property name="plugin.id" value="basic-plugin" />
+
+            <cm:property name="bp.file.extension" value="properties" />
+            <cm:property name="bp.file.mime.type" value="text/plain" />
+
+            <cm:property name="bp.file.edit.perspective.id" value="properties.edit" />
+
+        </cm:default-properties>
+    </cm:property-placeholder>
 
 
+    <!-- ================================================================================================== -->
+    <!-- GENERAL INTERFACE EXPORTS                                                                          -->
+    <!-- ================================================================================================== -->
+
+
+    <!-- =================================== -->
+    <!-- Content Types                       -->
+    <!-- =================================== -->
+
+    <service ref="bp.content.info" interface="org.pentaho.platform.api.engine.IContentInfo" activation="eager">
+        <service-properties>
+            <entry key="plugin-id" value="${plugin.id}" />
+            <entry key="extension" value="${bp.file.extension}" />
+        </service-properties>
+    </service>
+
+
+    <!-- =================================== -->
+    <!-- Content Generators                  -->
+    <!-- =================================== -->
+
+    <!-- register a base IContentGenerator implementation to handle all files with extension 'properties'   -->
+    <service ref="bp.content.generator" interface="org.pentaho.platform.api.engine.IContentGenerator" activation="eager">
+        <service-properties>
+            <entry key="plugin-id" value="${plugin.id}" />
+            <entry key="content-type" value="${bp.file.extension}" />
+        </service-properties>
+    </service>
+
+    <!-- register specific IContentGenerator implementations; this one handles the 'EDIT' action -->
+    <service ref="bp.content.generator" interface="org.pentaho.platform.api.engine.IContentGenerator" activation="eager">
+        <service-properties>
+            <entry key="plugin-id" value="${plugin.id}" />
+            <!-- the selected 'EDIT' action perspective ID gets placed as the content type -->
+            <entry key="content-type" value="${bp.file.edit.perspective.id}" />
+        </service-properties>
+    </service>
+
+
+    <!-- ================================================================================================== -->
+    <!-- GENERAL BEAN DECLARATIONS                                                                          -->
+    <!-- ================================================================================================== -->
+
+    <!-- =================================== -->
+    <!-- Content Generators                  -->
+    <!-- =================================== -->
+
+    <!-- IContentGenerator implementation -->
+    <bean id="bp.content.generator" class="pt.webdetails.basic.plugin.BasicPluginContentGenerator" />
+
+
+    <!-- =================================== -->
+    <!-- Content Types                       -->
+    <!-- =================================== -->
+
+
+    <bean id="bp.content.info" class="pt.webdetails.basic.plugin.contentinfo.ContentInfoExtended">
+
+        <!-- the file extension we'll become responsible for -->
+        <property name="extension" value="${bp.file.extension}" />
+
+        <!-- the mimeType -->
+        <property name="mimeType" value="${bp.file.mime.type}" />
+
+        <!-- the set of available operations for this file extension -->
+        <property name="operations">
+
+            <list value-type="org.pentaho.platform.api.engine.IPluginOperation">
+
+                <!-- 'OPEN' action -->
+                <bean class="org.pentaho.platform.engine.core.solution.PluginOperation">
+                    <argument value="RUN" />
+                    <!-- no perspective set: defaults to 'generatedContent' -->
+                </bean>
+
+                <!-- 'EDIT' action -->
+                <bean class="org.pentaho.platform.engine.core.solution.PluginOperation">
+                    <argument value="EDIT" />
+                    <!-- set a perspective ( maps to: 'content-type' service property ) for the 'EDIT' action -->
+                    <property name="perspective" value="${bp.file.edit.perspective.id}" />
+                </bean>
+
+            </list>
+        </property>
+    </bean>
 
 </blueprint>
