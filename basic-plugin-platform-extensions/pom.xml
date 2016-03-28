@@ -9,12 +9,12 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>basic-plugin-core</artifactId>
+  <artifactId>basic-plugin-platform-extensions</artifactId>
   <version>${basic.plugin.version}</version>
   <packaging>bundle</packaging>
 
-  <name>Basic Plugin OSGi bundle</name>
-  <description>Basic Plugin OSGi bundle</description>
+  <name>Basic Plugin OSGi Platform Extensions</name>
+  <description>This bundle leverages on core platform classes and extends them with public accessors</description>
   <url>http://www.pentaho.com/</url>
 
   <properties>
@@ -58,36 +58,6 @@
       </exclusions>
     </dependency>
 
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-proxy-factory</artifactId>
-      <version>${dependency.pentaho.platform.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>${dependency.javax.servlet.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>${dependency.javax.rs.ws.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- other dependencies -->
-
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>basic-plugin-platform-extensions</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
   </dependencies>
 
   <build>
@@ -102,35 +72,9 @@
             <Bundle-SymbolicName>
               ${project.artifactId}
             </Bundle-SymbolicName>
-            <Bundle-Activator>pt.webdetails.basic.plugin.BasicPluginBundleActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${plugin.org.codehaus.mojo.build-helper-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>src/main/resources/cfg/basic.plugin.cfg</file>
-                  <type>cfg</type>
-                  <classifier>basic-plugin-config</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
     </plugins>
   </build>
 

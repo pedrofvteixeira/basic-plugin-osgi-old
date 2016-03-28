@@ -10,7 +10,7 @@
 
   <groupId>pentaho</groupId>
   <artifactId>basic-plugin-parent-pom</artifactId>
-  <version>6.1-SNAPSHOT</version>
+  <version>${basic.plugin.version}</version>
   <packaging>pom</packaging>
 
   <name>Basic Plugin parent pom</name>
@@ -19,8 +19,10 @@
 
   <properties>
 
+    <!-- project version -->
+    <basic.plugin.version>7.0-SNAPSHOT</basic.plugin.version>
+
     <!-- platform dependencies -->
-    
     <dependency.pentaho.platform.version>${project.version}</dependency.pentaho.platform.version>
     <dependency.karaf.version>3.0.3</dependency.karaf.version>
 
@@ -101,6 +103,7 @@
 
   <modules>
 
+    <module>basic-plugin-platform-extensions</module>
     <module>basic-plugin-core</module>
     <module>basic-plugin-assembly</module>
 
