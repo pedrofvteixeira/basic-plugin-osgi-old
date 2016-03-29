@@ -42,6 +42,7 @@
     <dependency.slf4j-log4j12.version>1.7.9</dependency.slf4j-log4j12.version>
     <dependency.spring.framework.version>3.2.11.RELEASE</dependency.spring.framework.version>
     <dependency.spring.security.version>3.1.4.RELEASE</dependency.spring.security.version>
+    <dependency.ops4j.pax.web.version>3.1.4</dependency.ops4j.pax.web.version>
 
   </properties>
 

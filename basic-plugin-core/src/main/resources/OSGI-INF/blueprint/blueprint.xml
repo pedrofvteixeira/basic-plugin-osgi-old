@@ -80,6 +80,20 @@
     </service>
 
 
+    <!-- =================================== -->
+    <!-- Alternate Static Resources          -->
+    <!-- =================================== -->
+
+    <!-- HttpService Whiteboard registration of web assets -->
+    <service id="bp.whiteboard.service" interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping">
+        <bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
+            <!-- this translates to /osgi/<ALIAS>/<STATIC_RESOURCE> -->
+            <property name="alias" value="/alternate/basic-plugin/resources"/>
+            <property name="path" value="/resources"/>
+        </bean>
+    </service>
+
+
     <!-- ================================================================================================== -->
     <!-- GENERAL BEAN DECLARATIONS                                                                          -->
     <!-- ================================================================================================== -->
@@ -142,7 +156,6 @@
                 <entry key="/basic-plugin/resources" value="resources" />
             </map>
         </property>
-
 
         <!-- =================================== -->
         <!-- External Resources                  -->
