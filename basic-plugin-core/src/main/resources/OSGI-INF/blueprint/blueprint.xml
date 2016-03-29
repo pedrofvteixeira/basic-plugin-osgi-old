@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:security="http://www.springframework.org/schema/security"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:cxf="http://cxf.apache.org/blueprint/core"
+           xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs"
+           xmlns:jaxws="http://cxf.apache.org/blueprint/jaxws"
            xsi:schemaLocation="
                 http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
-                http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
-                http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd"
+                http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+                http://cxf.apache.org/blueprint/jaxws http://cxf.apache.org/schemas/blueprint/jaxws.xsd
+                http://cxf.apache.org/blueprint/jaxrs http://cxf.apache.org/schemas/blueprint/jaxrs.xsd
+                http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd"
            default-timeout="20000"
            default-activation="lazy">
 
@@ -37,6 +41,11 @@
     <!-- Content Types                       -->
     <!-- =================================== -->
 
+    <!--
+        Register 'bp.content.info' bean as the IContentInfo implementation to handle all
+        files with extension 'properties'; registered with 'plugin-id = basic-plugin'
+     -->
+    <!-- 'service' would be the equivalent of a (non-osgi) 'pen:publish' call -->
     <service ref="bp.content.info" interface="org.pentaho.platform.api.engine.IContentInfo" activation="eager">
         <service-properties>
             <entry key="plugin-id" value="${plugin.id}" />
@@ -49,13 +58,22 @@
     <!-- Content Generators                  -->
     <!-- =================================== -->
 
-    <!-- register a base IContentGenerator implementation to handle all files with extension 'properties'   -->
+    <!--
+        Register 'bp.content.generator' bean as the IContentGenerator implementation to handle all
+        files with extension 'properties'; registered with 'plugin-id = basic-plugin'
+     -->
+    <!-- 'service' would be the equivalent of a (non-osgi) 'pen:publish' call -->
+
+
+    <!-- register a IContentGenerator implementations for all default 'OPEN' actions ( /generatedContent ) -->
     <service ref="bp.content.generator" interface="org.pentaho.platform.api.engine.IContentGenerator" activation="eager">
         <service-properties>
             <entry key="plugin-id" value="${plugin.id}" />
+            <!-- this will handle all default /generatedContent for this content type -->
             <entry key="content-type" value="${bp.file.extension}" />
         </service-properties>
     </service>
+
 
     <!-- register specific IContentGenerator implementations; this one handles the 'EDIT' action -->
     <service ref="bp.content.generator" interface="org.pentaho.platform.api.engine.IContentGenerator" activation="eager">
@@ -87,8 +105,8 @@
     <!-- HttpService Whiteboard registration of web assets -->
     <service id="bp.whiteboard.service" interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping">
         <bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
-            <!-- this translates to /osgi/<ALIAS>/<STATIC_RESOURCE> -->
-            <property name="alias" value="/alternate/basic-plugin/resources"/>
+            <!-- this translates to /<webapp_name>/osgi/<ALIAS>/<STATIC_RESOURCE> -->
+            <property name="alias" value="/basic-plugin/resources"/>
             <property name="path" value="/resources"/>
         </bean>
     </service>
@@ -98,13 +116,19 @@
     <!-- GENERAL BEAN DECLARATIONS                                                                          -->
     <!-- ================================================================================================== -->
 
+    <!-- Get the platform's IUnifiedRepository implementation. -->
+    <!-- 'reference' would be the equivalent of a (non-osgi) 'pen:bean' call -->
+    <reference id="repository" availability="optional" timeout="5000"
+               interface="org.pentaho.platform.api.repository2.unified.IUnifiedRepository" />
+
     <!-- =================================== -->
     <!-- Content Generators                  -->
     <!-- =================================== -->
 
     <!-- IContentGenerator implementation -->
-    <bean id="bp.content.generator" class="pt.webdetails.basic.plugin.BasicPluginContentGenerator" />
-
+    <bean id="bp.content.generator" class="pt.webdetails.basic.plugin.BasicPluginContentGenerator">
+        <argument ref="repository" />
+    </bean>
 
     <!-- =================================== -->
     <!-- Content Types                       -->
@@ -152,7 +176,7 @@
         <property name="staticResourceMap">
             <map key-type="java.lang.String" value-type="java.lang.String">
 
-                <!-- this translates to /api/repos/basic-plugin/<LOCAL_FOLDER>/<STATIC_RESOURCE> -->
+                <!-- this translates to /<webapp_name>/api/repos/basic-plugin/<LOCAL_FOLDER>/<STATIC_RESOURCE> -->
                 <entry key="/basic-plugin/resources" value="resources" />
             </map>
         </property>
@@ -166,12 +190,38 @@
 
                 <entry key="mantle">
                     <list value-type="java.lang.String">
+                        <!-- leveraging on a static resource endpoint declaration -->
                         <value>api/repos/basic-plugin/resources/basic-plugin-startup.js</value>
                     </list>
                 </entry>
 
             </map>
         </property>
+    </bean>
+
+
+    <!-- =================================== -->
+    <!-- REST Endpoints                      -->
+    <!-- =================================== -->
+
+    <!--
+        Apache cxf framework supports service APIs like JAX-WS and JAX-RS.
+        These services can speak a variety of protocols such as SOAP, XML/HTTP, RESTful HTTP,
+        or CORBA and work over a variety of transports such as HTTP, JMS or JBI.
+    -->
+    <cxf:bus id="basicPluginCxfBus" />
+
+    <!-- this translates to /<webapp_name>/osgi/cxf/<ADDRESS>/<ENDPOINT_TERMINATION> -->
+    <jaxrs:server id="bp.cxf.jaxrs.service.endpoint" address="/basic-plugin">
+        <jaxrs:serviceBeans>
+            <ref component-id="bp.cxf.rest.api" />
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
+
+
+    <!-- ws endpoints bean -->
+    <bean id="bp.cxf.rest.api" class="pt.webdetails.basic.plugin.ws.BasicPluginCxfRestAPI">
+        <argument ref="repository" />
     </bean>
 
 </blueprint>

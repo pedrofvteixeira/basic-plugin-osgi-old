@@ -37,12 +37,20 @@ public class BasicPluginContentGenerator extends BaseContentGenerator {
 
   private IUnifiedRepository repository;
 
-  public BasicPluginContentGenerator() {
-    setRepository( PentahoSystem.get( IUnifiedRepository.class, null ) );
-  }
-
   public BasicPluginContentGenerator( IUnifiedRepository repository ) {
-    setRepository( repository );
+
+    try {
+
+      if( repository != null && repository.toString() != null ){
+        setRepository( repository );
+        return;
+      }
+
+    } catch ( Throwable t ) {
+      /* do nothing */
+    }
+
+    setRepository( PentahoSystem.get( IUnifiedRepository.class ) ); /* fallback */
   }
 
   @Override public void createContent() throws Exception {
