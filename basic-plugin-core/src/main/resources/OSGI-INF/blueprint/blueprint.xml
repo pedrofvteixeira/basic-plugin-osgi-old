@@ -197,6 +197,15 @@
 
             </map>
         </property>
+
+
+        <!-- =================================== -->
+        <!-- Lifecycle Listener                  -->
+        <!-- =================================== -->
+
+        <!-- platform will use the configured classloader to create a new instance for this classname -->
+        <property name="lifecycleListenerClassname" value="pt.webdetails.basic.plugin.BasicPluginLifecycleListener" />
+
     </bean>
 
 

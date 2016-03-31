@@ -1,5 +1,7 @@
 package pt.webdetails.basic.plugin.ws;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
@@ -11,6 +13,8 @@ import javax.ws.rs.core.MediaType;
 
 @Path( "/api" )
 public class BasicPluginCxfRestAPI {
+
+  protected static Log logger = LogFactory.getLog( BasicPluginCxfRestAPI.class );
 
   private IUnifiedRepository repository;
 
@@ -34,6 +38,7 @@ public class BasicPluginCxfRestAPI {
   @Path( "/ready" )
   @Produces( MediaType.TEXT_PLAIN )
   public String ready() {
+    logger.info( "basic-plugin CXF REST API called for endpoint: /ready" );
     return Boolean.toString( true );
   }
 

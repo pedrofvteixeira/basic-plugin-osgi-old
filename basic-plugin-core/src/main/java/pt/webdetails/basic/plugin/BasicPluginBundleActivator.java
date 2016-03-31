@@ -1,5 +1,7 @@
 package pt.webdetails.basic.plugin;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.pentaho.platform.api.engine.IPentahoObjectReference;
@@ -13,12 +15,16 @@ import java.util.Collections;
 
 public class BasicPluginBundleActivator implements BundleActivator {
 
+  protected static Log logger = LogFactory.getLog( BasicPluginBundleActivator.class );
+
   public static final String PLUGIN_ID = "plugin-id";
 
   IPentahoObjectRegistration objRegistration;
 
   @Override
   public void start( BundleContext bundleContext ) throws Exception {
+
+    logger.info( "basic-plugin BundleActivator.start() was triggered" );
 
     if( PentahoSystem.getInitializedOK() ) {
 
@@ -38,6 +44,8 @@ public class BasicPluginBundleActivator implements BundleActivator {
 
   @Override
   public void stop( BundleContext bundleContext ) throws Exception {
+
+    logger.info( "basic-plugin BundleActivator.stop() was triggered" );
 
     if( objRegistration != null ) {
       objRegistration.remove();
