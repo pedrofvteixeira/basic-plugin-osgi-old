@@ -13,14 +13,22 @@
   <version>${basic.plugin.version}</version>
   <packaging>bundle</packaging>
 
-  <name>Basic Plugin OSGi bundle</name>
-  <description>Basic Plugin OSGi bundle</description>
+  <name>Basic Plugin OSGi - Core bundle</name>
+  <description>Basic Plugin OSGi - Core bundle</description>
   <url>http://www.pentaho.com/</url>
 
   <properties>
   </properties>
 
   <dependencies>
+
+    <!-- basic plugin API dependency -->
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>basic-plugin-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <!-- platform (provided) dependencies -->
 
@@ -65,6 +73,8 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- other dependencies -->
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
@@ -76,15 +86,6 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
       <version>${dependency.javax.rs.ws.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- other dependencies -->
-
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>basic-plugin-platform-extensions</artifactId>
-      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 

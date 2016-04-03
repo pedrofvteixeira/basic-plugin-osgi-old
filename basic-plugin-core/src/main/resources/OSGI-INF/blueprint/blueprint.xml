@@ -22,11 +22,20 @@
         <cm:default-properties>
 
             <cm:property name="plugin.id" value="basic-plugin" />
+            <cm:property name="edit.perspective" value="edit-mode" />
 
-            <cm:property name="bp.file.extension" value="properties" />
-            <cm:property name="bp.file.mime.type" value="text/plain" />
+            <cm:property name="extension" value="properties" />
+            <cm:property name="mimeType" value="text/plain" />
+            <cm:property name="saySomething" value="Hello World!" />
 
-            <cm:property name="bp.file.edit.perspective.id" value="properties.edit" />
+            <cm:property name="perspective.title" value="BP Perspective" />
+
+            <cm:property name="overlay.type" value="BUTTON_CREATE_NEW" />
+            <cm:property name="overlay.id" value="launch" />
+            <cm:property name="overlay.item.id" value="launch" />
+            <cm:property name="overlay.command.id" value="Basic Plugin" />
+            <cm:property name="overlay.command.label" value="Create a New Basic Plugin" />
+            <cm:property name="overlay.command.uri" value="osgi/basic-plugin/resources/hello-world.properties" />
 
         </cm:default-properties>
     </cm:property-placeholder>
@@ -49,7 +58,7 @@
     <service ref="bp.content.info" interface="org.pentaho.platform.api.engine.IContentInfo" activation="eager">
         <service-properties>
             <entry key="plugin-id" value="${plugin.id}" />
-            <entry key="extension" value="${bp.file.extension}" />
+            <entry key="extension" value="${extension}" />
         </service-properties>
     </service>
 
@@ -70,7 +79,7 @@
         <service-properties>
             <entry key="plugin-id" value="${plugin.id}" />
             <!-- this will handle all default /generatedContent for this content type -->
-            <entry key="content-type" value="${bp.file.extension}" />
+            <entry key="content-type" value="${extension}" />
         </service-properties>
     </service>
 
@@ -80,7 +89,7 @@
         <service-properties>
             <entry key="plugin-id" value="${plugin.id}" />
             <!-- the selected 'EDIT' action perspective ID gets placed as the content type -->
-            <entry key="content-type" value="${bp.file.edit.perspective.id}" />
+            <entry key="content-type" value="${edit.perspective}" />
         </service-properties>
     </service>
 
@@ -103,11 +112,19 @@
     <!-- =================================== -->
 
     <!-- HttpService Whiteboard registration of web assets -->
-    <service id="bp.whiteboard.service" interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping">
+    <service id="bp.whiteboard.resources" interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping">
         <bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
-            <!-- this translates to /<webapp_name>/osgi/<ALIAS>/<STATIC_RESOURCE> -->
-            <property name="alias" value="/basic-plugin/resources"/>
+            <!-- this translates to /<webapp_name>/osgi/<ALIAS>/<RESOURCE_FILENAME> -->
+            <property name="alias" value="/${plugin.id}/resources"/>
             <property name="path" value="/resources"/>
+        </bean>
+    </service>
+
+    <service id="bp.whiteboard.lang" interface="org.ops4j.pax.web.extender.whiteboard.ResourceMapping">
+        <bean class="org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping">
+            <!-- this translates to /<webapp_name>/osgi/<ALIAS>/<RESOURCE_FILENAME> -->
+            <property name="alias" value="/${plugin.id}/lang"/>
+            <property name="path" value="/lang"/>
         </bean>
     </service>
 
@@ -125,8 +142,15 @@
     <!-- Content Generators                  -->
     <!-- =================================== -->
 
+    <bean id="bp.settings" class="pt.webdetails.basic.plugin.BasicPluginSettings" activation="eager">
+        <property name="extension" value="${extension}" />
+        <property name="mimeType" value="${mimeType}" />
+        <property name="saySomething" value="${saySomething}" />
+    </bean>
+
     <!-- IContentGenerator implementation -->
     <bean id="bp.content.generator" class="pt.webdetails.basic.plugin.BasicPluginContentGenerator">
+        <argument ref="bp.settings" />
         <argument ref="repository" />
     </bean>
 
@@ -138,10 +162,10 @@
     <bean id="bp.content.info" class="pt.webdetails.basic.plugin.platform.extensions.ContentInfoExtended">
 
         <!-- the file extension we'll become responsible for -->
-        <property name="extension" value="${bp.file.extension}" />
+        <property name="extension" value="${extension}" />
 
         <!-- the mimeType -->
-        <property name="mimeType" value="${bp.file.mime.type}" />
+        <property name="mimeType" value="${mimeType}" />
 
         <!-- the set of available operations for this file extension -->
         <property name="operations">
@@ -158,7 +182,7 @@
                 <bean class="org.pentaho.platform.engine.core.solution.PluginOperation">
                     <argument value="EDIT" />
                     <!-- set a perspective ( maps to: 'content-type' service property ) for the 'EDIT' action -->
-                    <property name="perspective" value="${bp.file.edit.perspective.id}" />
+                    <property name="perspective" value="${edit.perspective}" />
                 </bean>
 
             </list>
@@ -176,8 +200,8 @@
         <property name="staticResourceMap">
             <map key-type="java.lang.String" value-type="java.lang.String">
 
-                <!-- this translates to /<webapp_name>/api/repos/basic-plugin/<LOCAL_FOLDER>/<STATIC_RESOURCE> -->
-                <entry key="/basic-plugin/resources" value="resources" />
+                <!-- this translates to /<webapp_name>/api/repos/<ENTRY_KEY>/<STATIC_RESOURCE> -->
+                <entry key="/${plugin.id}/resources" value="resources" />
             </map>
         </property>
 
@@ -198,14 +222,6 @@
             </map>
         </property>
 
-
-        <!-- =================================== -->
-        <!-- Lifecycle Listener                  -->
-        <!-- =================================== -->
-
-        <!-- platform will use the configured classloader to create a new instance for this classname -->
-        <property name="lifecycleListenerClassname" value="pt.webdetails.basic.plugin.BasicPluginLifecycleListener" />
-
     </bean>
 
 
@@ -221,7 +237,7 @@
     <cxf:bus id="basicPluginCxfBus" />
 
     <!-- this translates to /<webapp_name>/osgi/cxf/<ADDRESS>/<ENDPOINT_TERMINATION> -->
-    <jaxrs:server id="bp.cxf.jaxrs.service.endpoint" address="/basic-plugin">
+    <jaxrs:server id="bp.cxf.jaxrs.service.endpoint" address="/${plugin.id}">
         <jaxrs:serviceBeans>
             <ref component-id="bp.cxf.rest.api" />
         </jaxrs:serviceBeans>
@@ -229,8 +245,54 @@
 
 
     <!-- ws endpoints bean -->
-    <bean id="bp.cxf.rest.api" class="pt.webdetails.basic.plugin.ws.BasicPluginCxfRestAPI">
+    <bean id="bp.cxf.rest.api" class="pt.webdetails.basic.plugin.BasicPluginCxfRestAPI">
+        <argument ref="bp.settings" />
         <argument ref="repository" />
+    </bean>
+
+    <!-- =================================== -->
+    <!-- Perspective                         -->
+    <!-- =================================== -->
+
+    <!-- 'service' would be the equivalent of a (non-osgi) 'pen:publish' call -->
+    <service ref="bp.perspective" interface="org.pentaho.platform.api.engine.perspective.pojo.IPluginPerspective" activation="eager">
+        <service-properties>
+            <entry key="plugin-id" value="${plugin.id}" />
+        </service-properties>
+    </service>
+
+    <bean id="bp.perspective" class="org.pentaho.platform.plugin.services.pluginmgr.perspective.pojo.DefaultPluginPerspective">
+        <property name="id" value="${plugin.id}"/>
+        <property name="title" value="${perspective.title}"/>
+        <property name="contentUrl" value="osgi/${plugin.id}/resources/basic-plugin-startup.js"/>
+        <property name="resourceBundleUri" value="osgi/${plugin.id}/lang/messages"/>
+        <property name="requiredSecurityActions">
+            <list>
+                <value>org.pentaho.security.administerSecurity</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- =================================== -->
+    <!-- Overlays                            -->
+    <!-- =================================== -->
+
+    <!-- 'service' would be the equivalent of a (non-osgi) 'pen:publish' call -->
+    <service interface="org.pentaho.ui.xul.XulOverlay" activation="eager">
+        <service-properties>
+            <entry key="plugin-id" value="${plugin.id}" />
+        </service-properties>
+        <bean factory-ref="factory.overlay" factory-method="build" />
+    </service>
+
+    <bean id="factory.overlay" class="pt.webdetails.basic.plugin.platform.extensions.XulOverlayFactory" >
+        <argument value="${overlay.type}" />
+        <property name="resourceBundleUri" value="osgi/${plugin.id}/lang/messages" />
+        <property name="overlayId" value="${overlay.id}" />
+        <property name="itemId" value="${overlay.item.id}" />
+        <property name="commandId" value="${overlay.command.id}" />
+        <property name="commandLabel" value="${overlay.command.label}" />
+        <property name="commandUri" value="${overlay.command.uri}" />
     </bean>
 
 </blueprint>
